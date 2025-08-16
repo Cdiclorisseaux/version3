@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Générateur de critique — CDI</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h1, h2 { color: #333; }
+  label { font-weight: bold; margin-top: 10px; display: block; }
+  input, textarea, select { width: 100%; padding: 6px; margin-top: 4px; }
+  button { margin-top: 15px; padding: 10px 15px; }
+  #resultat { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Critique de livre</h1>
+
+<h2>I. Présentation du livre</h2>
+<label>Titre :</label><input type="text" id="titre">
+<label>Auteur :</label><input type="text" id="auteur">
+<label>Éditeur :</label><input type="text" id="editeur">
+<label>Type de livre :</label><input type="text" id="type">
+<label>Genre :</label><input type="text" id="genre">
+<label>Résumé (1-2 phrases) :</label><textarea id="resume"></textarea>
+
+<h2>II. Avis argumenté</h2>
+<label>Ce qui m’a donné envie de lire :</label><input type="text" id="envie">
+<label>Émotion ressentie :</label><input type="text" id="emotion">
+<label>Note (étoiles) :</label>
+<select id="etoiles">
+  <option>★☆☆☆☆</option>
+  <option>★★☆☆☆</option>
+  <option>★★★☆☆</option>
+  <option>★★★★☆</option>
+  <option>★★★★★</option>
+</select>
+<label>Qualificatif de l’histoire :</label><input type="text" id="qualificatif">
+<label>Avis sur l’écriture :</label><input type="text" id="ecriture">
+<label>Objectif du livre :</label><input type="text" id="objectif">
+<label>Recommandation :</label><input type="text" id="recommandation">
+
+<h2>III. Personnalisation</h2>
+<label>Avis libre / conclusion :</label><textarea id="avisLibre"></textarea>
+
+<button type="button" id="genBtn">Générer</button>
+
+<h2>Critique générée</h2>
+<div id="resultat"></div>
+
+<script>
+function sentence(s) {
+  const t = (s || '').trim();
+  if (!t) return '';
+  let out = t.charAt(0).toUpperCase() + t.slice(1);
+  if (!/[.!?…]$/.test(out)) out += '.';
+  return out + ' ';
+}
+
+document.getElementById('genBtn').addEventListener('click', () => {
+  const fields = ['titre','auteur','editeur','type','genre','resume','envie','emotion','etoiles','qualificatif','ecriture','objectif','recommandation','avisLibre'];
+  const v = {};
+  fields.forEach(f => v[f] = document.getElementById(f).value.trim());
+
+  let text = '';
+  if (v.titre) text += `« ${v.titre} »`;
+  if (v.type) text += ` est un ${v.type.toLowerCase()}`;
+  if (v.genre) text += ` de genre ${v.genre.toLowerCase()}`;
+  if (v.auteur) text += `, écrit par ${v.auteur}`;
+  if (v.editeur) text += `, publié chez ${v.editeur}`;
+  text += '. ';
+  if (v.resume) text += sentence(v.resume);
+
+  if (v.envie) text += `J’ai choisi ce livre car ${v.envie.toLowerCase()}. `;
+  if (v.emotion) text += `Pendant et après ma lecture, j’ai ressenti ${v.emotion.toLowerCase()}. `;
+  if (v.etoiles) text += `Note : ${v.etoiles}. `;
+  if (v.qualificatif) text += sentence(v.qualificatif);
+  if (v.ecriture) text += `Le style est ${v.ecriture.toLowerCase()}. `;
+  if (v.objectif) text += `L’objectif est ${v.objectif.toLowerCase()}. `;
+  if (v.recommandation) text += `${v.recommandation}. `;
+  if (v.avisLibre) text += sentence(v.avisLibre);
+
+  document.getElementById('resultat').textContent = text.trim();
+});
+</script>
+
+</body>
+</html>
