@@ -1,88 +1,130 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Générateur de critique — CDI</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  h1, h2 { color: #333; }
-  label { font-weight: bold; margin-top: 10px; display: block; }
-  input, textarea, select { width: 100%; padding: 6px; margin-top: 4px; }
-  button { margin-top: 15px; padding: 10px 15px; }
-  #resultat { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; white-space: pre-wrap; }
-</style>
+  <meta charset="UTF-8">
+  <title>Générateur de critique</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, textarea { width: 100%; padding: 5px; margin-top: 3px; }
+    h1, h2 { color: #2c3e50; }
+    .stars span {
+      font-size: 24px;
+      cursor: pointer;
+      color: #ccc;
+    }
+    .stars span.selected { color: gold; }
+    #generer {
+      margin-top: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
+  <h1>Critique de livre</h1>
 
-<h1>Critique de livre</h1>
+  <form id="critForm" onsubmit="return false;">
+    <h2>I. Présentation du livre</h2>
+    <label>Titre</label>
+    <input type="text" id="titre">
+    <label>Auteur</label>
+    <input type="text" id="auteur">
+    <label>Éditeur</label>
+    <input type="text" id="editeur">
+    <label>Type de livre</label>
+    <input type="text" id="type" placeholder="Ex: roman, album, BD...">
+    <label>Genre</label>
+    <input type="text" id="genre" placeholder="Ex: Aventure, policier, guerre...">
+    <label>Résumé (1-2 phrases)</label>
+    <textarea id="resume"></textarea>
+    <label>Personnage principal</label>
+    <input type="text" id="personnage">
 
-<h2>I. Présentation du livre</h2>
-<label>Titre :</label><input type="text" id="titre">
-<label>Auteur :</label><input type="text" id="auteur">
-<label>Éditeur :</label><input type="text" id="editeur">
-<label>Type de livre :</label><input type="text" id="type">
-<label>Genre :</label><input type="text" id="genre">
-<label>Résumé (1-2 phrases) :</label><textarea id="resume"></textarea>
+    <h2>II. Avis argumenté</h2>
+    <label>Choix du livre</label>
+    <input type="text" id="choix" placeholder="Ex: couverture, résumé, conseillé par...">
+    <label>Émotion ressentie</label>
+    <input type="text" id="emotion" placeholder="Ex: joie, tristesse, peur, colère...">
+    <label>Note (étoiles)</label>
+    <div class="stars" id="stars">
+      <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
+    </div>
+    <label>Qualificatif de l’histoire</label>
+    <input type="text" id="qualificatif" placeholder="captivante, drôle, poétique...">
+    <label>Avis sur l’écriture</label>
+    <input type="text" id="ecriture">
+    <label>Objectif du livre</label>
+    <input type="text" id="objectif">
+    <label>Recommandation</label>
+    <input type="text" id="recommandation">
 
-<h2>II. Avis argumenté</h2>
-<label>Ce qui m’a donné envie de lire :</label><input type="text" id="envie">
-<label>Émotion ressentie :</label><input type="text" id="emotion">
-<label>Note (étoiles) :</label>
-<select id="etoiles">
-  <option>★☆☆☆☆</option>
-  <option>★★☆☆☆</option>
-  <option>★★★☆☆</option>
-  <option>★★★★☆</option>
-  <option>★★★★★</option>
-</select>
-<label>Qualificatif de l’histoire :</label><input type="text" id="qualificatif">
-<label>Avis sur l’écriture :</label><input type="text" id="ecriture">
-<label>Objectif du livre :</label><input type="text" id="objectif">
-<label>Recommandation :</label><input type="text" id="recommandation">
+    <h2>III. Personnalisation</h2>
+    <label>Avis libre / conclusion</label>
+    <textarea id="avisLibre"></textarea>
 
-<h2>III. Personnalisation</h2>
-<label>Avis libre / conclusion :</label><textarea id="avisLibre"></textarea>
+    <button id="generer">Générer</button>
+  </form>
 
-<button type="button" id="genBtn">Générer</button>
+  <div id="output"></div>
 
-<h2>Critique générée</h2>
-<div id="resultat"></div>
+  <script>
+    // gestion étoiles
+    let stars = document.querySelectorAll('#stars span');
+    let selectedStars = 0;
+    stars.forEach(star => {
+      star.addEventListener('click', function() {
+        selectedStars = this.getAttribute('data-value');
+        stars.forEach(s => s.classList.remove('selected'));
+        for (let i = 0; i < selectedStars; i++) {
+          stars[i].classList.add('selected');
+        }
+      });
+    });
 
-<script>
-function sentence(s) {
-  const t = (s || '').trim();
-  if (!t) return '';
-  let out = t.charAt(0).toUpperCase() + t.slice(1);
-  if (!/[.!?…]$/.test(out)) out += '.';
-  return out + ' ';
-}
+    document.getElementById('generer').addEventListener('click', () => {
+      let titre = document.getElementById('titre').value;
+      let auteur = document.getElementById('auteur').value;
+      let editeur = document.getElementById('editeur').value;
+      let type = document.getElementById('type').value;
+      let genre = document.getElementById('genre').value;
+      let resume = document.getElementById('resume').value;
+      let personnage = document.getElementById('personnage').value;
+      let choix = document.getElementById('choix').value;
+      let emotion = document.getElementById('emotion').value;
+      let qualificatif = document.getElementById('qualificatif').value;
+      let ecriture = document.getElementById('ecriture').value;
+      let objectif = document.getElementById('objectif').value;
+      let recommandation = document.getElementById('recommandation').value;
+      let avisLibre = document.getElementById('avisLibre').value;
 
-document.getElementById('genBtn').addEventListener('click', () => {
-  const fields = ['titre','auteur','editeur','type','genre','resume','envie','emotion','etoiles','qualificatif','ecriture','objectif','recommandation','avisLibre'];
-  const v = {};
-  fields.forEach(f => v[f] = document.getElementById(f).value.trim());
+      let critique = `J’ai lu "${titre}" écrit par ${auteur} et publié chez ${editeur}. 
+C’est un ${type} appartenant au genre ${genre}. L’histoire met en avant le personnage de ${personnage}. 
+Voici un résumé : ${resume}.
 
-  let text = '';
-  if (v.titre) text += `« ${v.titre} »`;
-  if (v.type) text += ` est un ${v.type.toLowerCase()}`;
-  if (v.genre) text += ` de genre ${v.genre.toLowerCase()}`;
-  if (v.auteur) text += `, écrit par ${v.auteur}`;
-  if (v.editeur) text += `, publié chez ${v.editeur}`;
-  text += '. ';
-  if (v.resume) text += sentence(v.resume);
+J’ai choisi ce livre car ${choix}. Pendant ma lecture, j’ai ressenti ${emotion}. 
+Globalement, j’ai trouvé que l’histoire était ${qualificatif}. Le style d’écriture m’a semblé ${ecriture}. 
+Je donnerais la note de ${selectedStars} étoiles. 
 
-  if (v.envie) text += `J’ai choisi ce livre car ${v.envie.toLowerCase()}. `;
-  if (v.emotion) text += `Pendant et après ma lecture, j’ai ressenti ${v.emotion.toLowerCase()}. `;
-  if (v.etoiles) text += `Note : ${v.etoiles}. `;
-  if (v.qualificatif) text += sentence(v.qualificatif);
-  if (v.ecriture) text += `Le style est ${v.ecriture.toLowerCase()}. `;
-  if (v.objectif) text += `L’objectif est ${v.objectif.toLowerCase()}. `;
-  if (v.recommandation) text += `${v.recommandation}. `;
-  if (v.avisLibre) text += sentence(v.avisLibre);
+Selon moi, l’objectif de ce livre est de ${objectif}. 
+Je le recommande plutôt à ${recommandation}. 
 
-  document.getElementById('resultat').textContent = text.trim();
-});
-</script>
+En conclusion, ${avisLibre}`;
 
+      document.getElementById('output').innerText = critique;
+    });
+  </script>
 </body>
 </html>
